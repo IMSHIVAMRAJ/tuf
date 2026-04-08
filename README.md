@@ -23,32 +23,16 @@ A React + JavaScript component inspired by a physical wall calendar layout, with
   - Desktop: 3-panel layout (hero, calendar, notes)
   - Mobile: stacked layout with touch-friendly day targets and controls
 
-## Stack
+ TechStack
 
 - Vite
 - React
 - CSS (custom, no UI framework)
 
-## Run Locally
-
+How to Run Locally
 
 npm install
 npm run dev
 
-## Files of Interest
-
-- `src/App.jsx`: calendar logic, range selection, notes, persistence
-- `src/App.css`: component styling and responsive layout
-- `src/style.css`: global theme and page background
-- `src/main.jsx`: React entrypoint
-
-## Demo Video Checklist
-
-When creating your required video demo (Loom/YouTube/screen recording), show:
-
-1. Selecting a date range (start + end + highlighted middle days)
-2. Writing a month note and a range note
-3. Reloading to prove local persistence
-4. Desktop view to mobile responsive transition
 
 
