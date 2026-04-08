@@ -33,6 +33,21 @@ const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=1400&q=80',
 ]
 
+const MONTH_THEMES = [
+  { label: 'Frost Trail', accent: '#3b82c4', soft: '#d9ebf8', quote: 'Fresh starts grow in quiet mornings.' },
+  { label: 'Peak Air', accent: '#2f6f96', soft: '#d2e6f1', quote: 'Small steps shape strong months.' },
+  { label: 'Thaw Light', accent: '#2f9b8f', soft: '#d2f1ec', quote: 'Momentum loves consistency.' },
+  { label: 'Spring Lift', accent: '#2f9f6d', soft: '#d7f2e5', quote: 'Plan boldly, adjust gently.' },
+  { label: 'Sun Path', accent: '#c68a2f', soft: '#faedd8', quote: 'Make room for deep work and fresh air.' },
+  { label: 'Blue Wind', accent: '#2f7bb9', soft: '#d8eafb', quote: 'The best routines are the ones you keep.' },
+  { label: 'High Summer', accent: '#d36a37', soft: '#fae2d8', quote: 'Energy follows intention.' },
+  { label: 'Late Light', accent: '#c7732d', soft: '#f9e7d8', quote: 'Leave white space for what matters.' },
+  { label: 'Golden Ridge', accent: '#b27b2f', soft: '#f4e6d6', quote: 'Focus on fewer, better priorities.' },
+  { label: 'Crisp Air', accent: '#8b6ea9', soft: '#e8e0f3', quote: 'Finish strong with clear boundaries.' },
+  { label: 'Deep Forest', accent: '#2f7868', soft: '#d9eee9', quote: 'Reflect, refine, repeat.' },
+  { label: 'Year End', accent: '#2c5c8e', soft: '#d4e3f1', quote: 'Celebrate progress, not perfection.' },
+]
+
 function zeroTime(value) {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate())
 }
@@ -131,6 +146,7 @@ function App() {
   const currentRangeKey = rangeKey(startDate, endDate)
   const todayIso = toIsoDate(new Date())
   const heroImage = HERO_IMAGES[activeMonth.getMonth()]
+  const theme = MONTH_THEMES[activeMonth.getMonth()]
 
   const monthNoteValue = monthNotes[currentMonthKey] ?? ''
   const rangeNoteValue = currentRangeKey ? rangeNotes[currentRangeKey] ?? '' : ''
@@ -144,6 +160,7 @@ function App() {
       ? `${toIsoDate(startDate)} to ${toIsoDate(endDate)} (${selectedDuration} day${selectedDuration > 1 ? 's' : ''})`
       : `Start: ${toIsoDate(startDate)}`
     : 'No dates selected'
+  const rangeFillPercent = Math.min((selectedDuration / 31) * 100, 100)
 
   function navigateMonth(step) {
     setActiveMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + step, 1))
@@ -212,13 +229,18 @@ function App() {
 
   return (
     <main className="page-shell">
-      <section className="calendar-card" aria-label="Interactive wall calendar">
+      <section
+        className="calendar-card"
+        aria-label="Interactive wall calendar"
+        style={{ '--accent-color': theme.accent, '--accent-soft': theme.soft }}
+      >
         <div className="wire-hanger" aria-hidden="true" />
 
         <div className="calendar-layout">
           <aside className="hero-panel">
             <div className="spiral-strip" aria-hidden="true" />
             <div className="hero-image" style={{ backgroundImage: `url(${heroImage})` }}>
+              <div className="season-sticker">{theme.label}</div>
               <div className="month-badge">
                 <span>{activeMonth.getFullYear()}</span>
                 <strong>{MONTH_NAMES[activeMonth.getMonth()].toUpperCase()}</strong>
@@ -237,21 +259,23 @@ function App() {
               </button>
             </header>
 
-            <div className="calendar-grid" role="grid" aria-label={monthLabel}>
+            <div key={monthLabel} className="calendar-grid month-shift" role="grid" aria-label={monthLabel}>
               {WEEKDAYS.map((day) => (
                 <div className="weekday" key={day} role="columnheader">
                   {day}
                 </div>
               ))}
 
-              {cells.map((cell) => {
+              {cells.map((cell, index) => {
                 const boundary = isBoundary(cell.date)
                 const iso = toIsoDate(cell.date)
                 const inRange = isInRange(cell.date)
                 const isToday = iso === todayIso
+                const isWeekend = cell.date.getDay() === 0 || cell.date.getDay() === 6
                 const classNames = [
                   'day-cell',
                   cell.inCurrentMonth ? 'in-month' : 'out-month',
+                  isWeekend ? 'weekend' : '',
                   inRange ? 'in-range' : '',
                   boundary ? `is-${boundary}` : '',
                   isToday ? 'is-today' : '',
@@ -264,6 +288,7 @@ function App() {
                     key={iso}
                     type="button"
                     className={classNames}
+                    style={{ '--stagger': `${index * 12}ms` }}
                     onClick={() => handleDateClick(cell.date, cell.inCurrentMonth)}
                     aria-label={`Select ${iso}`}
                   >
@@ -274,7 +299,12 @@ function App() {
             </div>
 
             <footer className="selection-summary">
-              <p>{selectionLabel}</p>
+              <div className="selection-copy">
+                <p>{selectionLabel}</p>
+                <div className="range-meter" aria-hidden="true">
+                  <span style={{ width: `${rangeFillPercent}%` }} />
+                </div>
+              </div>
               <button type="button" onClick={clearSelection} disabled={!startDate}>
                 Clear selection
               </button>
@@ -313,6 +343,8 @@ function App() {
                   ? `Range note: ${selectionLabel}`
                   : 'Select a full date range first'}
             </label>
+
+            <p className="month-quote">{theme.quote}</p>
 
             <textarea
               id="notes-textarea"
